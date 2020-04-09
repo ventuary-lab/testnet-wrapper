@@ -8,7 +8,7 @@ class Oracle {
     invoke(params) {}
 
     parseParams(params) {
-        return params.map((param) => {
+        return params.split(',').map((param) => {
             let [value, type] = param.split(':');
             if (type === 'integer') {
                 value = Number(value);
@@ -22,8 +22,8 @@ class Oracle {
 }
 
 class ControlOracle extends Oracle {
-    seedData = seedUtils.fromExistingPhrase(process.env.CONTROL_SEED);
     chainId = process.env.CHAIN_ID || 'T';
+    seedData = new seedUtils.Seed(process.env.CONTROL_SEED, this.chainId)
     nodeUrl = process.env.NODE_URL || 'https://nodes-testnet.wavesnodes.com';
 
     constructor() {
@@ -31,9 +31,10 @@ class ControlOracle extends Oracle {
     }
 
     async invoke(params) {
-        const { branch, invocation, args, dApp } = params;
+        const { branch, invocation, args, dApp, feeWaves } = params;
 
         const parsedParams = this.parseParams(args);
+        // console.log({ seed: this.seedData, env: process.env })
 
         try {
             const params = {
@@ -43,7 +44,7 @@ class ControlOracle extends Oracle {
                 },
                 dApp: dApp || this.seedData.address,
                 chainId: this.chainId,
-                // fee: 100000,
+                fee: Number(feeWaves),
                 // feeAssetId: '73pu8pHFNpj9tmWuYjqnZ962tXzJvLGX86dxjZxGYhoK',
                 //senderPublicKey: 'by default derived from seed',
                 //timestamp: Date.now(),
@@ -51,12 +52,13 @@ class ControlOracle extends Oracle {
                 //chainId:
             };
 
-            const signedTx = invokeScript(params, this.seedData.seed);
+            const signedTx = invokeScript(params, this.seedData.phrase);
 
             const broadcastResult = await broadcast(signedTx, this.nodeUrl);
-
+            console.log({ broadcastResult })
             return broadcastResult;
         } catch (err) {
+            console.log({ err })
             return err;
         }
     }

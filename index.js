@@ -7,9 +7,9 @@ const grabParam = (param) =>
     process.argv.indexOf(param) !== -1 ? process.argv[process.argv.indexOf(param) + 1] : null;
 const port = grabParam('--port') || 8005;
 
-const envProvided = dotenv();
+const envProvided = dotenv.config();
 if (!envProvided) {
-    dotenv({ path: __dirname + '.env.example' });
+    dotenv.config({ path: __dirname + '.env.example' });
 }
 
 const app = express();
