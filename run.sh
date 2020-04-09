@@ -1,10 +1,15 @@
 #!/bin/bash
 
 port=8009
+cwd=$(pwd)
 
-if [ -n "$1" ]
-then
-    port=$1
-fi
+while [ -n "$1" ]
+do
+    case "$1" in
+        --pwd) cwd=$2 ;;
+        --port) port=$2 ;;
+    esac
+    shift
+done
 
-node index.js --port "$port"
+node "$cwd/index.js" --port "$port"
