@@ -16,17 +16,18 @@ class RouteController {
 
 
         app.post('/testnet/set-script', async (req, res) => {
-            const { branch, sc, feeWaves, isRaw } = req.query;
+            const { branch, sc, feeWaves, isRaw, isTextBody } = req.query;
             const { script } = req.body
 
             let result = {};
 
-            if (!script) {
+            if (!script && isTextBody != 1) {
                 result = { message: 'Empty script' }
             } else {
                 result = await app.contract.setScript({
                     name: sc,
-                    params: { branch, sc, feeWaves, isRaw, script },
+                    request: req,
+                    params: { branch, sc, feeWaves, isRaw, isTextBody, script },
                 });
             }
 

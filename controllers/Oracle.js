@@ -1,5 +1,6 @@
 const { invokeScript, broadcast, seedUtils, setScript } = require('@waves/waves-transactions');
 const axios = require('axios');
+const { exec } = require('child_process');
 class Oracle {
     constructor(name) {
         this.name = name;
@@ -45,27 +46,36 @@ class Oracle {
         }
     }
 
-    async setScript(params) {
-        const { branch, args, feeWaves, isRaw } = params;
+    async setScript(request, params) {
+        const { branch, args, feeWaves, isRaw, isTextBody } = params;
         let { script } = params;
 
         console.log({ params });
 
         try {
+            let compiledScript = '';
             if (isRaw == 1) {
-                const response = await axios.post('/utils/script/compileCode',  script, {
-                    baseURL: this.nodeUrl,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                if (isTextBody == 1) {
+                    script = request.body;
+                }
+
+                const query = `curl -X POST "${this.nodeUrl}/utils/script/compileCode"
+                -H "accept: application/json" 
+                -H "Content-Type: application/json" 
+                -d "${script}"`
+                    .replace(/\"/g, "'")
+                    .replace(/\n/g, '');
+
+                compiledScript = await new Promise((resolve) => {
+                    exec(query, (err, stdout, stderr) => {
+                        console.log(stdout);
+                        resolve(JSON.parse(stdout));
+                    });
                 });
-                console.log({ data: response.data });
             }
 
-            return;
-
             const params = {
-                script: 'AQa3b8tH', //true
+                script: compiledScript, //true
                 timestamp: Date.now(),
                 chainId: this.chainId,
                 fee: Number(feeWaves),

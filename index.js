@@ -14,6 +14,7 @@ if (!envProvided) {
 
 const app = express();
 
+app.use(express.text());
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true }));
 app.contract = new ContractController();

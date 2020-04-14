@@ -9,9 +9,9 @@ class ContractController {
         }
     }
 
-    async setScript({ name, params }) {
+    async setScript({ name, params, request }) {
         if (name === 'control') {
-            return await this.controlOracle.setScript(params);
+            return await this.controlOracle.setScript(request, params);
         }
     }
 }
