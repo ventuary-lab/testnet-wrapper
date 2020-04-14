@@ -13,6 +13,26 @@ class RouteController {
             res.set('Content-Type', 'application/json');
             res.send(JSON.stringify({ result }));
         });
+
+
+        app.post('/testnet/set-script', async (req, res) => {
+            const { branch, sc, feeWaves, isRaw } = req.query;
+            const { script } = req.body
+
+            let result = {};
+
+            if (!script) {
+                result = { message: 'Empty script' }
+            } else {
+                result = await app.contract.setScript({
+                    name: sc,
+                    params: { branch, sc, feeWaves, isRaw, script },
+                });
+            }
+
+            res.set('Content-Type', 'application/json');
+            res.send(JSON.stringify({ result }));
+        });
     }
 }
 
